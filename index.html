@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Friends List</title>
+    <style>
+      .box-block,
+      .hidden {
+        flex-direction: column;
+        max-width: 500px;
+        padding: 10px;
+        display: none;
+      }
+
+      .input-field {
+        padding: 5px;
+        margin-bottom: 10px;
+      }
+      .btn {
+        padding: 10px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="#" method="post">
+      <label for="friend">How many GOOD friend do you have : </label>
+      <select name="friend" id="friend">
+        <option value="Select">Select</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+      <div class="hidden">
+        <input
+          type="text"
+          name="name"
+          class="input-field"
+          placeholder="Friend's name"
+        />
+        <button type="button" class="btn">Save friend list</button>
+      </div>
+      <div class="box-block"></div>
+    </form>
+  </body>
+  <script>
+    const select = document.querySelector("select");
+    const box = document.querySelector(".box-block");
+    const inputField = document.querySelector(".input-field");
+    const btn = document.querySelector(".btn");
+    let node = "";
+    let friends = [];
+
+    select.addEventListener("change", (e) => {
+      node = "";
+      const inputs = document.querySelectorAll(".input-field");
+      inputs.forEach((input) => input.remove());
+
+      const number = Number(e.target.value);
+      box.style.display = "flex";
+      for (i = 1; i <= number; i++) {
+        node = inputField.cloneNode(true);
+        box.append(node);
+      }
+      box.append(btn);
+    });
+
+    btn.addEventListener("click", (e) => {
+      friends = [];
+      const inputs = document.querySelectorAll(".input-field");
+      inputs.forEach((input) => {
+        if (input.value) {
+          friends.push(input.value);
+          input.value = "";
+        }
+      });
+      if (friends.length > 0) {
+        console.log(friends);
+        let AllFriendsData = fetchFriend();
+        AllFriendsData.then((data) => console.log(data));
+      }
+    });
+
+    // fetch data
+
+    async function fetchFriend() {
+      const url = "/api";
+      let friends = [
+        {
+          name: "morpheus",
+          job: "leader",
+        },
+      ];
+      let options = {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(friends),
+      };
+      const response = await fetch(url, options);
+      // const Jsonfriends = await response.json();
+      return response;
+    }
+
+    // clear input field
+    // Empty field not count
+
+    // create server
+    // save file
+    // pull file save
+    // operation on file
+  </script>
+</html>
