@@ -7,3 +7,10 @@ GET http://localhost/
 ###
 
 POST http://localhost/api
+
+###
+
+POST http://localhost/user
+
+###
+GET http://localhost/users

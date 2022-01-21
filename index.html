@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Friends List</title>
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
       .box-block,
       .hidden {
         flex-direction: column;
@@ -25,27 +29,25 @@
     </style>
   </head>
   <body>
-    <form action="#" method="post">
-      <label for="friend">How many GOOD friend do you have : </label>
-      <select name="friend" id="friend">
-        <option value="Select">Select</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-      </select>
-      <div class="hidden">
-        <input
-          type="text"
-          name="name"
-          class="input-field"
-          placeholder="Friend's name"
-        />
-        <button type="button" class="btn">Save friend list</button>
-      </div>
-      <div class="box-block"></div>
-    </form>
+    <label for="friend">How many GOOD friend do you have : </label>
+    <select name="friend" id="friend">
+      <option value="Select">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+    <div class="hidden">
+      <input
+        type="text"
+        name="name"
+        class="input-field"
+        placeholder="Friend's name"
+      />
+      <button type="button" class="btn">Save friend list</button>
+    </div>
+    <div class="box-block"></div>
   </body>
   <script>
     const select = document.querySelector("select");
@@ -74,27 +76,24 @@
       const inputs = document.querySelectorAll(".input-field");
       inputs.forEach((input) => {
         if (input.value) {
-          friends.push(input.value);
+          friends.push({ name: input.value });
           input.value = "";
         }
       });
       if (friends.length > 0) {
-        console.log(friends);
-        let AllFriendsData = fetchFriend();
-        AllFriendsData.then((data) => console.log(data));
+        let AllFriendsData = fetchFriend(friends);
+        AllFriendsData.then((data) => {
+          let recData = data.json();
+          recData.then((res) => {
+            addDataToDom(res);
+          });
+        });
       }
     });
 
     // fetch data
-
-    async function fetchFriend() {
+    async function fetchFriend(friends) {
       const url = "/api";
-      let friends = [
-        {
-          name: "morpheus",
-          job: "leader",
-        },
-      ];
       let options = {
         method: "post",
         headers: {
@@ -103,16 +102,17 @@
         body: JSON.stringify(friends),
       };
       const response = await fetch(url, options);
-      // const Jsonfriends = await response.json();
       return response;
     }
 
-    // clear input field
-    // Empty field not count
+    // Add data to dom
+    function addDataToDom(arr) {
+      const pTags = box.querySelectorAll("p");
+      pTags.forEach((p) => p.remove());
 
-    // create server
-    // save file
-    // pull file save
-    // operation on file
+      arr.forEach((ele, i) => {
+        box.insertAdjacentHTML("beforeend", `<p>${i + 1}: ${ele.name}</p>`);
+      });
+    }
   </script>
 </html>
