@@ -2,14 +2,13 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const path = require("path");
-const fs = require("fs");
 const port = 80;
 
 require("dotenv").config();
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
   res.sendFile(path.join(__dirname + "/index.html"));
 });
 
@@ -24,6 +23,23 @@ app.post("/api", async (req, res) => {
     } catch (error) {
       res.status(500).send(error);
     }
+  }
+
+  // Delete friend from list
+  // first find friend
+  // const deleteFriend = await friendsList.deleteOne({ _id: "Ankit" });
+  // console.log(deleteFriend);
+
+  const friends = await friendsList.find({});
+  res.send(friends);
+});
+
+app.post("/deleteId", async (req, res) => {
+  const body = req.body;
+  try {
+    await friendsList.deleteOne({ _id: `${body.id}` });
+  } catch (error) {
+    res.status(500).send(error);
   }
   const friends = await friendsList.find({});
   res.send(friends);
@@ -61,4 +77,8 @@ const friendsSchema = new Schema(
   }
 );
 
+// 1. Create end point /deleteFriend✅
+// 2. recieve id console.✅
+// 3. delete friend form friend list✅
+// 4. send response✅
 const friendsList = mongoose.model("friendsList", friendsSchema);

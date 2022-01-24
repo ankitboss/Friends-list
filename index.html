@@ -25,6 +25,27 @@
       .btn {
         padding: 10px;
         margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      button {
+        cursor: pointer;
+      }
+      .list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .list-item:hover {
+        background-color: burlywood;
+      }
+      .result {
+        max-height: 450px;
+        overflow: scroll;
+        border: 1px solid black;
+        border-radius: 8px;
+      }
+      .result::-webkit-scrollbar {
+        display: none;
       }
     </style>
   </head>
@@ -48,7 +69,9 @@
       <button type="button" class="btn">Save friend list</button>
     </div>
     <div class="box-block"></div>
-    <div class="result">Your Friends</div>
+    <div class="result">
+      <h2>Your Friends</h2>
+    </div>
   </body>
   <script>
     const select = document.querySelector("select");
@@ -110,12 +133,55 @@
 
     // Add data to dom
     function addDataToDom(arr) {
-      const pTags = result.querySelectorAll("p");
-      pTags.forEach((p) => p.remove());
+      const listItems = result.querySelectorAll(".list-item");
+      listItems.forEach((item) => item.remove());
       result.style.display = "block";
-      arr.forEach((ele, i) => {
-        result.insertAdjacentHTML("beforeend", `<p>${i + 1}: ${ele.name}</p>`);
+      arr.forEach((obj, i) => {
+        result.insertAdjacentHTML(
+          "beforeend",
+          genrateResult(i, obj._id, obj.name)
+        );
+      });
+      removeFriend();
+    }
+
+    function genrateResult(n, id, name) {
+      const str = `<div class="list-item"><p><span class="num">${
+        n + 1
+      }</span>: ${name} </p><button data-id="${id}" type="button" class="remove-btn">Remove</button></div>`;
+      return str;
+    }
+
+    function removeFriend() {
+      const removeButtons = document.querySelectorAll(".remove-btn");
+      removeButtons.forEach((button) => {
+        button.addEventListener("click", (e) => {
+          const id = { id: button.dataset.id };
+          const updatedRes = fetchRemoveId(id);
+          updatedRes.then((res) => {
+            const data = res.json();
+            data.then((data) => addDataToDom(data));
+          });
+        });
       });
     }
+
+    async function fetchRemoveId(id) {
+      const url = "/deleteId";
+      const options = {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(id),
+      };
+
+      const response = await fetch(url, options);
+      return response;
+    }
+    // 1. add data attribute to remove button✅
+    // 2. add event listener to the remove button✅
+    // 3. create function for send id to the end point✅
+    // 4. update dom✅
   </script>
 </html>
