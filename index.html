@@ -8,13 +8,13 @@
     <style>
       * {
         margin: 0;
-        padding: 0;
+        padding: 3px;
       }
       .box-block,
+      .result,
       .hidden {
         flex-direction: column;
         max-width: 500px;
-        padding: 10px;
         display: none;
       }
 
@@ -48,10 +48,12 @@
       <button type="button" class="btn">Save friend list</button>
     </div>
     <div class="box-block"></div>
+    <div class="result">Your Friends</div>
   </body>
   <script>
     const select = document.querySelector("select");
     const box = document.querySelector(".box-block");
+    const result = document.querySelector(".result");
     const inputField = document.querySelector(".input-field");
     const btn = document.querySelector(".btn");
     let node = "";
@@ -82,10 +84,11 @@
       });
       if (friends.length > 0) {
         let AllFriendsData = fetchFriend(friends);
+
         AllFriendsData.then((data) => {
           let recData = data.json();
-          recData.then((res) => {
-            addDataToDom(res);
+          recData.then((data) => {
+            addDataToDom(data);
           });
         });
       }
@@ -107,11 +110,11 @@
 
     // Add data to dom
     function addDataToDom(arr) {
-      const pTags = box.querySelectorAll("p");
+      const pTags = result.querySelectorAll("p");
       pTags.forEach((p) => p.remove());
-
+      result.style.display = "block";
       arr.forEach((ele, i) => {
-        box.insertAdjacentHTML("beforeend", `<p>${i + 1}: ${ele.name}</p>`);
+        result.insertAdjacentHTML("beforeend", `<p>${i + 1}: ${ele.name}</p>`);
       });
     }
   </script>

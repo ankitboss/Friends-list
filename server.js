@@ -21,21 +21,12 @@ app.post("/api", async (req, res) => {
     const user = new friendsList(value);
     try {
       await user.save();
-      const friends = await friendsList.find({});
-      res.send(friends);
     } catch (error) {
       res.status(500).send(error);
     }
   }
-
-  // Save data to the file!!!!
-  // for (const [_, value] of Object.entries(body)) {
-  //   fs.appendFileSync("friendsList.txt", `${value.name},`, "utf8");
-  // }
-
-  // Read data from the file
-  // const file = fs.readFileSync("friendsList.txt", "utf8");
-  // res.json(file.split(","));
+  const friends = await friendsList.find({});
+  res.send(friends);
 });
 
 app.listen(port, () => {
@@ -61,7 +52,6 @@ const friendsSchema = new Schema(
     name: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
       minlength: 3,
     },
