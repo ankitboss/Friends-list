@@ -147,7 +147,6 @@
       const data = await response.json();
       totalFriends.innerHTML = data.length;
       addDataToDom(data);
-      switchToInput();
     }
     gettingList();
 
@@ -241,6 +240,7 @@
           genrateResult(i, arr[i]._id, arr[i].name)
         );
       }
+      switchToInput();
       removeFriend();
     }
 
@@ -256,7 +256,7 @@
     }
 
     // Switch to input field when click to edit button
-    function switchToInput(input) {
+    function switchToInput() {
       const edit = document.querySelectorAll(".edit-btn");
       edit.forEach((btn, i) => {
         btn.addEventListener("click", (e) => {
@@ -315,9 +315,24 @@
       });
     }
 
+    // When click save update name
+    async function fetchUpdateName(id, name) {
+      const url = "/update-name";
+      const options = {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(id, name),
+      };
+
+      const response = await fetch(url, options);
+      return response;
+    }
+
     // Getting removal unique _id from database
     async function fetchRemoveId(id) {
-      const url = "/deleteId";
+      const url = "/delete-name";
       const options = {
         method: "post",
         headers: {

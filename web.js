@@ -16,7 +16,11 @@ app.get("/", (_, res) => {
 
 app.get("/getlist", async (_, res) => {
   const friends = await friendsList.find({});
-  res.send(friends);
+  try {
+    res.send(friends);
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 app.post("/api", async (req, res) => {
@@ -36,7 +40,12 @@ app.post("/api", async (req, res) => {
   res.send(friends);
 });
 
-app.post("/deleteId", async (req, res) => {
+app.post("/update-name", async (req, res) => {
+  const body = req.body;
+  console.log(body);
+});
+
+app.post("/delete-name", async (req, res) => {
   const body = req.body;
   try {
     await friendsList.deleteOne({ _id: `${body.id}` });
