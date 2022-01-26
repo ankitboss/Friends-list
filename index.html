@@ -265,7 +265,7 @@
           const pTag = parent.querySelector("p");
 
           if (e.target.innerHTML == "Cancel") {
-            switchToText(pTag, e.target);
+            switchToText(pTag, name, e.target);
             return;
           }
           const ele = document.createElement("input");
@@ -283,18 +283,15 @@
           pTag.append(btn);
 
           // console.log(parent, pTag, ele);
-          name.remove();
+          name.style.display = "none";
         });
       });
     }
 
     // Switch input to text
-    function switchToText(pTag, targetEle) {
+    function switchToText(pTag, name, targetEle) {
       const input = pTag.querySelector("input");
-      const name = document.createElement("span");
-      name.setAttribute("class", "friend-name");
-      name.innerHTML = input.value;
-      pTag.append(name);
+      name.style.display = "inline";
       pTag.querySelector(".save-btn").remove();
       input.remove();
       targetEle.innerHTML = "Edit";
