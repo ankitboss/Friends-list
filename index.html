@@ -284,6 +284,8 @@
 
           // console.log(parent, pTag, ele);
           name.style.display = "none";
+
+          updateName();
         });
       });
     }
@@ -315,15 +317,36 @@
       });
     }
 
-    // When click save update name
-    async function fetchUpdateName(id, name) {
+    // Update name to click save button
+    function updateName() {
+      const saveBtn = document.querySelectorAll(".save-btn");
+      saveBtn.forEach((button) => {
+        button.addEventListener("click", (e) => {
+          const parent = e.target.parentElement;
+          const input = parent.querySelector("input");
+          const name = input.value;
+          const obj = { id: input.dataset.id, name: name };
+          const updatedRes = fetchUpdateName(obj);
+          updatedRes.then((res) => {
+            const data = res.json();
+            data.then((data) => {
+              addDataToDom(data);
+              totalFriends.innerHTML = data.length;
+            });
+          });
+        });
+      });
+    }
+
+    // When click save send updated name
+    async function fetchUpdateName(obj) {
       const url = "/update-name";
       const options = {
         method: "post",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(id, name),
+        body: JSON.stringify(obj),
       };
 
       const response = await fetch(url, options);

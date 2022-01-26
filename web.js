@@ -15,9 +15,8 @@ app.get("/", (_, res) => {
 });
 
 app.get("/getlist", async (_, res) => {
-  const friends = await friendsList.find({});
   try {
-    res.send(friends);
+    friends(res);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -36,13 +35,22 @@ app.post("/api", async (req, res) => {
     }
   }
 
-  const friends = await friendsList.find({});
-  res.send(friends);
+  friends(res);
 });
 
 app.post("/update-name", async (req, res) => {
   const body = req.body;
-  console.log(body);
+  try {
+    await friendsList.updateOne(
+      { _id: body.id },
+      {
+        $set: { name: body.name },
+      }
+    );
+    friends(res);
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 app.post("/delete-name", async (req, res) => {
@@ -52,9 +60,17 @@ app.post("/delete-name", async (req, res) => {
   } catch (error) {
     res.status(500).send(error);
   }
-  const friends = await friendsList.find({});
-  res.send(friends);
+  friends(res);
 });
+
+async function friends(res) {
+  try {
+    const friends = await friendsList.find({});
+    res.send(friends);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
 
 app.listen(port, () => {
   console.log("Server Started!!!");
