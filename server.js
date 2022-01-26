@@ -8,8 +8,15 @@ require("dotenv").config();
 
 app.use(express.json());
 
+app.use(express.static(__dirname + "/index.html"));
+
 app.get("/", (_, res) => {
   res.sendFile(path.join(__dirname + "/index.html"));
+});
+
+app.get("/getlist", async (_, res) => {
+  const friends = await friendsList.find({});
+  res.send(friends);
 });
 
 app.post("/api", async (req, res) => {
@@ -17,18 +24,13 @@ app.post("/api", async (req, res) => {
 
   // Database
   for (const [_, value] of Object.entries(data)) {
-    const user = new friendsList(value);
+    const user = await new friendsList(value);
     try {
       await user.save();
     } catch (error) {
       res.status(500).send(error);
     }
   }
-
-  // Delete friend from list
-  // first find friend
-  // const deleteFriend = await friendsList.deleteOne({ _id: "Ankit" });
-  // console.log(deleteFriend);
 
   const friends = await friendsList.find({});
   res.send(friends);
@@ -65,12 +67,7 @@ db.once("open", function () {
 const Schema = mongoose.Schema;
 const friendsSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 3,
-    },
+    name: String,
   },
   {
     timestamps: true,

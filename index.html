@@ -10,6 +10,7 @@
         margin: 0;
         padding: 3px;
       }
+
       .box-block,
       .result,
       .hidden {
@@ -47,41 +48,120 @@
       .result::-webkit-scrollbar {
         display: none;
       }
+      input:focus {
+        outline: none;
+      }
+
+      .total-friends {
+        margin-left: 10px;
+        background: rgb(46, 54, 32);
+        padding: 5px 16px;
+        border-radius: 4px;
+        color: white;
+      }
+      .add-new-friend,
+      .get-list-btn {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        background: darkslategrey;
+        padding: 5px 16px;
+        border-radius: 4px;
+        color: white;
+      }
+      .get-list-btn {
+        margin-right: 10px;
+      }
+      .add-new-friend:hover,
+      .get-list-btn:hover {
+        background-color: transparent;
+        color: darkcyan;
+        border-color: aqua;
+      }
+      .select-wrap {
+        display: none;
+        margin-bottom: 20px;
+      }
+      .edit-btn {
+        margin-left: auto;
+        margin-right: 10px;
+        padding: 3px 10px;
+      }
+      .save-btn {
+        margin-left: 10px;
+      }
     </style>
   </head>
   <body>
-    <label for="friend">How many GOOD friend do you have : </label>
-    <select name="friend" id="friend">
-      <option value="Select">Select</option>
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-    </select>
-    <div class="hidden">
-      <input
-        type="text"
-        name="name"
-        class="input-field"
-        placeholder="Friend's name"
-      />
-      <button type="button" class="btn">Save friend list</button>
-    </div>
-    <div class="box-block"></div>
-    <div class="result">
-      <h2>Your Friends</h2>
+    <div class="main-container">
+      <div class="wrapper">
+        <div class="friend-list">
+          Your GOOD friend is
+          <span class="total-friends">16</span>
+        </div>
+        <button class="get-list-btn">Get List</button>
+        <button class="add-new-friend">Add New Friend</button>
+      </div>
+      <div class="select-wrap">
+        <label for="friend">How many GOOD friend do you have : </label>
+        <select name="friend" id="friend">
+          <option value="Select">Select</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+
+      <div class="hidden">
+        <input
+          type="text"
+          name="name"
+          class="input-field"
+          placeholder="Friend's name"
+        />
+        <button type="button" class="btn">Save friend list</button>
+      </div>
+      <div class="box-block"></div>
+      <div class="result">
+        <h2>Your Friends</h2>
+      </div>
     </div>
   </body>
   <script>
+    // Selection element
     const select = document.querySelector("select");
+    const getListBtn = document.querySelector(".get-list-btn");
     const box = document.querySelector(".box-block");
+    const addNewFriend = document.querySelector(".add-new-friend");
     const result = document.querySelector(".result");
+    const totalFriends = document.querySelector(".total-friends");
     const inputField = document.querySelector(".input-field");
     const btn = document.querySelector(".btn");
     let node = "";
     let friends = [];
 
+    // Getting all friends list first and show number of friends on dom
+    async function gettingList() {
+      const response = await fetch("/getlist");
+      const data = await response.json();
+      totalFriends.innerHTML = data.length;
+      addDataToDom(data);
+      switchToInput();
+    }
+    gettingList();
+
+    // Show All friend list
+    getListBtn.addEventListener("click", () => {
+      result.style.display = "block";
+    });
+
+    // Show Add new friend fields
+    addNewFriend.addEventListener("click", () => {
+      document.querySelector(".select-wrap").style.display = "block";
+    });
+
+    // Select option and show input fields
     select.addEventListener("change", (e) => {
       node = "";
       const inputs = document.querySelectorAll(".input-field");
@@ -91,11 +171,29 @@
       box.style.display = "flex";
       for (i = 1; i <= number; i++) {
         node = inputField.cloneNode(true);
+        validateName(node);
         box.append(node);
       }
       box.append(btn);
     });
 
+    // Validate name function
+    function validateName(element) {
+      var regex = /^[a-zA-Z ]{3,30}$/;
+      element.addEventListener("input", (e) => {
+        const value = e.currentTarget.value;
+
+        if (value.match(regex)) {
+          e.currentTarget.style.borderColor = "green";
+          btn.disabled = false;
+        } else {
+          e.currentTarget.style.borderColor = "red";
+          btn.disabled = true;
+        }
+      });
+    }
+
+    // Save Friend list function on click to the button
     btn.addEventListener("click", (e) => {
       friends = [];
       const inputs = document.querySelectorAll(".input-field");
@@ -106,18 +204,19 @@
         }
       });
       if (friends.length > 0) {
+        result.style.display = "block";
         let AllFriendsData = fetchFriend(friends);
-
         AllFriendsData.then((data) => {
           let recData = data.json();
           recData.then((data) => {
             addDataToDom(data);
+            totalFriends.innerHTML = data.length;
           });
         });
       }
     });
 
-    // fetch data
+    // fetch data - return reponse in form of friends list (total)
     async function fetchFriend(friends) {
       const url = "/api";
       let options = {
@@ -131,27 +230,77 @@
       return response;
     }
 
-    // Add data to dom
+    // Add data to dom - update dom when add friend, edit friend and remove friend
     function addDataToDom(arr) {
       const listItems = result.querySelectorAll(".list-item");
       listItems.forEach((item) => item.remove());
-      result.style.display = "block";
-      arr.forEach((obj, i) => {
+
+      for (let i = arr.length - 1; i >= 0; i--) {
         result.insertAdjacentHTML(
           "beforeend",
-          genrateResult(i, obj._id, obj.name)
+          genrateResult(i, arr[i]._id, arr[i].name)
         );
-      });
+      }
       removeFriend();
     }
 
+    // generate result string for updating dom
     function genrateResult(n, id, name) {
       const str = `<div class="list-item"><p><span class="num">${
         n + 1
-      }</span>: ${name} </p><button data-id="${id}" type="button" class="remove-btn">Remove</button></div>`;
+      }</span>: <span class="friend-name">${name}</span> </p>
+      <button data-id="${id}" type="button" class="edit-btn">Edit</button>
+      <button data-id="${id}" type="button" class="remove-btn">Remove</button>
+      </div>`;
       return str;
     }
 
+    // Switch to input field when click to edit button
+    function switchToInput(input) {
+      const edit = document.querySelectorAll(".edit-btn");
+      edit.forEach((btn, i) => {
+        btn.addEventListener("click", (e) => {
+          const parent = e.target.parentElement;
+          const name = parent.querySelector(".friend-name");
+          const pTag = parent.querySelector("p");
+
+          if (e.target.innerHTML == "Cancel") {
+            switchToText(pTag, e.target);
+            return;
+          }
+          const ele = document.createElement("input");
+          const btn = document.createElement("button");
+          const id = e.target.dataset.id;
+          ele.setAttribute("type", "text");
+          ele.setAttribute("data-id", `${id}`);
+          ele.setAttribute("value", `${name.innerHTML}`);
+          btn.setAttribute("class", "save-btn");
+
+          btn.innerHTML = "Save";
+          e.target.innerHTML = "Cancel";
+
+          pTag.append(ele);
+          pTag.append(btn);
+
+          // console.log(parent, pTag, ele);
+          name.remove();
+        });
+      });
+    }
+
+    // Switch input to text
+    function switchToText(pTag, targetEle) {
+      const input = pTag.querySelector("input");
+      const name = document.createElement("span");
+      name.setAttribute("class", "friend-name");
+      name.innerHTML = input.value;
+      pTag.append(name);
+      pTag.querySelector(".save-btn").remove();
+      input.remove();
+      targetEle.innerHTML = "Edit";
+    }
+
+    // Remove friends by click on remove button
     function removeFriend() {
       const removeButtons = document.querySelectorAll(".remove-btn");
       removeButtons.forEach((button) => {
@@ -160,12 +309,16 @@
           const updatedRes = fetchRemoveId(id);
           updatedRes.then((res) => {
             const data = res.json();
-            data.then((data) => addDataToDom(data));
+            data.then((data) => {
+              addDataToDom(data);
+              totalFriends.innerHTML = data.length;
+            });
           });
         });
       });
     }
 
+    // Getting removal unique _id from database
     async function fetchRemoveId(id) {
       const url = "/deleteId";
       const options = {
