@@ -120,7 +120,7 @@
           class="input-field"
           placeholder="Friend's name"
         />
-        <button type="button" class="btn">Save friend list</button>
+        <button type="button" class="btn" disabled>Save friend list</button>
       </div>
       <div class="box-block"></div>
       <div class="result">
@@ -180,14 +180,21 @@
     function validateName(element) {
       var regex = /^[a-zA-Z ]{3,30}$/;
       element.addEventListener("input", (e) => {
-        const value = e.currentTarget.value;
+        const target = e.currentTarget;
+        const value = target.value;
+        const checkBtn = target.nextSibling.dataset.btn == "true";
 
         if (value.match(regex)) {
-          e.currentTarget.style.borderColor = "green";
-          btn.disabled = false;
+          target.style.borderColor = "green";
+
+          checkBtn
+            ? (target.nextSibling.disabled = false)
+            : (btn.disabled = false);
         } else {
           e.currentTarget.style.borderColor = "red";
-          btn.disabled = true;
+          checkBtn
+            ? (target.nextSibling.disabled = true)
+            : (btn.disabled = true);
         }
       });
     }
@@ -216,7 +223,7 @@
     });
 
     // fetch data - return reponse in form of friends list (total)
-    async function fetchFriend(friends) {
+    function fetchFriend(friends) {
       const url = "/api";
       let options = {
         method: "post",
@@ -225,8 +232,8 @@
         },
         body: JSON.stringify(friends),
       };
-      const response = await fetch(url, options);
-      return response;
+
+      return response(url, options);
     }
 
     // Add data to dom - update dom when add friend, edit friend and remove friend
@@ -268,21 +275,22 @@
             switchToText(pTag, name, e.target);
             return;
           }
-          const ele = document.createElement("input");
+          const inputEle = document.createElement("input");
           const btn = document.createElement("button");
           const id = e.target.dataset.id;
-          ele.setAttribute("type", "text");
-          ele.setAttribute("data-id", `${id}`);
-          ele.setAttribute("value", `${name.innerHTML}`);
+          inputEle.setAttribute("type", "text");
+          inputEle.setAttribute("data-id", `${id}`);
+          inputEle.setAttribute("value", `${name.innerHTML}`);
           btn.setAttribute("class", "save-btn");
+          btn.setAttribute("data-btn", "true");
 
           btn.innerHTML = "Save";
           e.target.innerHTML = "Cancel";
 
-          pTag.append(ele);
+          pTag.append(inputEle);
           pTag.append(btn);
 
-          // console.log(parent, pTag, ele);
+          validateName(inputEle);
           name.style.display = "none";
 
           updateName();
@@ -339,7 +347,7 @@
     }
 
     // When click save send updated name
-    async function fetchUpdateName(obj) {
+    function fetchUpdateName(obj) {
       const url = "/update-name";
       const options = {
         method: "post",
@@ -349,12 +357,11 @@
         body: JSON.stringify(obj),
       };
 
-      const response = await fetch(url, options);
-      return response;
+      return response(url, options);
     }
 
     // Getting removal unique _id from database
-    async function fetchRemoveId(id) {
+    function fetchRemoveId(id) {
       const url = "/delete-name";
       const options = {
         method: "post",
@@ -364,12 +371,11 @@
         body: JSON.stringify(id),
       };
 
-      const response = await fetch(url, options);
-      return response;
+      return response(url, options);
     }
-    // 1. add data attribute to remove button✅
-    // 2. add event listener to the remove button✅
-    // 3. create function for send id to the end point✅
-    // 4. update dom✅
+
+    async function response(url, options) {
+      return await fetch(url, options);
+    }
   </script>
 </html>

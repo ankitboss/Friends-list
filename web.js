@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const path = require("path");
-const port = 80;
+const port = 5051;
 
 require("dotenv").config();
 
@@ -99,8 +99,4 @@ const friendsSchema = new Schema(
   }
 );
 
-// 1. Create end point /deleteFriend✅
-// 2. recieve id console.✅
-// 3. delete friend form friend list✅
-// 4. send response✅
 const friendsList = mongoose.model("friendsList", friendsSchema);
